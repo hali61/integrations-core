@@ -10,6 +10,10 @@ def echo_sleep(x):
     return x
 
 
+# create a file for the healthcheck
+with open("/tmp/running", "w+"):
+    pass
+
 while True:
     ray.init(address="ray://ray-head:10001")
 

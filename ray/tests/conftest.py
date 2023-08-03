@@ -27,7 +27,6 @@ from .common import (
 def dd_environment():
 
     with docker_run(
-        build=True,
         compose_file=os.path.join(
             HERE,
             "docker",

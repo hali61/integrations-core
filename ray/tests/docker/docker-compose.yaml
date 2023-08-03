@@ -11,6 +11,14 @@ services:
       - "${HEAD_METRICS_PORT}:8080"
       - "${HEAD_DASHBOARD_PORT}:8265"
       - "10001:10001"
+    healthcheck:
+      test: python /home/ray/ping.py "http://localhost:8080" || exit 1
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    volumes:
+      - ./ping.py:/home/ray/ping.py
   ray-worker-1:
     container_name: ray-worker-1
     hostname: ray-worker-1
@@ -20,7 +28,15 @@ services:
       - "${WORKER1_METRICS_PORT}:8080"
     depends_on:
       ray-head:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: python /home/ray/ping.py "http://localhost:8080" || exit 1
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    volumes:
+      - ./ping.py:/home/ray/ping.py
   ray-worker-2:
     container_name: ray-worker-2
     hostname: ray-worker-2
@@ -30,7 +46,15 @@ services:
       - "${WORKER2_METRICS_PORT}:8080"
     depends_on:
       ray-head:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: python /home/ray/ping.py "http://localhost:8080" || exit 1
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    volumes:
+      - ./ping.py:/home/ray/ping.py
   ray-worker-3:
     container_name: ray-worker-3
     hostname: ray-worker-3
@@ -40,20 +64,34 @@ services:
       - "${WORKER3_METRICS_PORT}:8080"
     depends_on:
       ray-head:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: python /home/ray/ping.py "http://localhost:8080" || exit 1
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
+    volumes:
+      - ./ping.py:/home/ray/ping.py
   ray-echo-task:
     container_name: ray-echo-task
     hostname: ray-echo-task
-    build:
-      context: echo_task
-      args:
-        - RAY_VERSION=${RAY_VERSION}
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "python /home/ray/echo.py"
+    healthcheck:
+      test: bash -c "[ -f /tmp/running ]"
+      interval: 3s
+      retries: 20
+      start_period: 5s
+      timeout: 5s
     depends_on:
       ray-head:
-        condition: service_started
+        condition: service_healthy
       ray-worker-1:
-        condition: service_started
+        condition: service_healthy
       ray-worker-2:
-        condition: service_started
+        condition: service_healthy
       ray-worker-3:
-        condition: service_started
+        condition: service_healthy
+    volumes:
+      - ./echo_task/main.py:/home/ray/echo.py
