@@ -1,7 +1,10 @@
 [env.collectors.datadog-checks]
 
-[envs.default]
-e2e-env = false
-
 [[envs.default.matrix]]
 python = ["3.9"]
+version = ["2.6"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "RAY_VERSION", value = "2.6.1", if = ["2.6"] },
+]

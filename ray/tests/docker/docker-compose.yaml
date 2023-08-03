@@ -1,36 +1,59 @@
-version: '3.8'
+version: '3.9'
 
 services:
   ray-head:
     container_name: ray-head
     hostname: ray-head
-    image: rayproject/ray-ml:2.6.1-cpu
-    command: bash -c "ray start --port=6379 --dashboard-host=0.0.0.0 --head --block"
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "ray start --port=6379 --dashboard-host=0.0.0.0 --metrics-export-port=8080 --head --block"
     ports:
       - "6379:6379"
-      - "8265:8265"
+      - "${HEAD_METRICS_PORT}:8080"
+      - "${HEAD_DASHBOARD_PORT}:8265"
       - "10001:10001"
   ray-worker-1:
     container_name: ray-worker-1
     hostname: ray-worker-1
-    image: rayproject/ray-ml:2.6.1-cpu
-    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --block"
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --metrics-export-port=8080 --block"
+    ports:
+      - "${WORKER1_METRICS_PORT}:8080"
     depends_on:
       ray-head:
         condition: service_started
   ray-worker-2:
     container_name: ray-worker-2
     hostname: ray-worker-2
-    image: rayproject/ray-ml:2.6.1-cpu
-    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --block"
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --metrics-export-port=8080 --block"
+    ports:
+      - "${WORKER2_METRICS_PORT}:8080"
     depends_on:
       ray-head:
         condition: service_started
   ray-worker-3:
     container_name: ray-worker-3
     hostname: ray-worker-3
-    image: rayproject/ray-ml:2.6.1-cpu
-    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --block"
+    image: rayproject/ray-ml:${RAY_VERSION}-cpu
+    command: bash -c "ray start --address=ray-head:6379 --num-cpus=2 --metrics-export-port=8080 --block"
+    ports:
+      - "${WORKER3_METRICS_PORT}:8080"
     depends_on:
       ray-head:
+        condition: service_started
+  ray-echo-task:
+    container_name: ray-echo-task
+    hostname: ray-echo-task
+    build:
+      context: echo_task
+      args:
+        - RAY_VERSION=${RAY_VERSION}
+    depends_on:
+      ray-head:
+        condition: service_started
+      ray-worker-1:
+        condition: service_started
+      ray-worker-2:
+        condition: service_started
+      ray-worker-3:
         condition: service_started
