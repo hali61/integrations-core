@@ -12,19 +12,24 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 
 from .common import (
+    E2E_METADATA,
     HEAD_DASHBOARD_PORT,
     HEAD_METRICS_PORT,
     HEAD_OPENMETRICS_ENDPOINT,
+    HEAD_OPENMETRICS_INSTANCE,
     HERE,
     RAY_VERSION,
     SERVE_PORT,
     SERVE_URL,
     WORKER1_METRICS_PORT,
     WORKER1_OPENMETRICS_ENDPOINT,
+    WORKER1_OPENMETRICS_INSTANCE,
     WORKER2_METRICS_PORT,
     WORKER2_OPENMETRICS_ENDPOINT,
+    WORKER2_OPENMETRICS_INSTANCE,
     WORKER3_METRICS_PORT,
     WORKER3_OPENMETRICS_ENDPOINT,
+    WORKER3_OPENMETRICS_INSTANCE,
 )
 
 
@@ -60,7 +65,17 @@ def dd_environment():
             run_add()
             time.sleep(1)
 
-        yield {}
+        yield {
+            "init_config": {
+                "service": "ray-service",
+            },
+            "instances": [
+                HEAD_OPENMETRICS_INSTANCE,
+                WORKER1_OPENMETRICS_INSTANCE,
+                WORKER2_OPENMETRICS_INSTANCE,
+                WORKER3_OPENMETRICS_INSTANCE,
+            ],
+        }, E2E_METADATA
 
 
 @pytest.fixture

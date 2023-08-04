@@ -22,3 +22,42 @@ WORKER1_OPENMETRICS_ENDPOINT = f"http://{get_docker_hostname()}:{WORKER1_METRICS
 WORKER2_OPENMETRICS_ENDPOINT = f"http://{get_docker_hostname()}:{WORKER2_METRICS_PORT}"
 WORKER3_OPENMETRICS_ENDPOINT = f"http://{get_docker_hostname()}:{WORKER3_METRICS_PORT}"
 SERVE_URL = f"http://{get_docker_hostname()}:{SERVE_PORT}"
+
+
+HEAD_OPENMETRICS_INSTANCE = {
+    "openmetrics_endpoint": HEAD_OPENMETRICS_ENDPOINT,
+}
+
+WORKER1_OPENMETRICS_INSTANCE = {
+    "openmetrics_endpoint": WORKER1_OPENMETRICS_ENDPOINT,
+}
+
+WORKER2_OPENMETRICS_INSTANCE = {
+    "openmetrics_endpoint": WORKER2_OPENMETRICS_ENDPOINT,
+}
+
+WORKER3_OPENMETRICS_INSTANCE = {
+    "openmetrics_endpoint": WORKER3_OPENMETRICS_ENDPOINT,
+}
+
+MOCKED_HEAD_OPENMETRICS_INSTANCE = {
+    "openmetrics_endpoint": "http://ray-head:8080/",
+}
+
+MOCKED_WORKER1_OPENMETRICS_INSTANCE = {
+    "openmetrics_endpoint": "http://ray-worker1:8081/",
+}
+
+MOCKED_WORKER2_OPENMETRICS_INSTANCE = {
+    "openmetrics_endpoint": "http://ray-worker2:8082/",
+}
+
+MOCKED_WORKER3_OPENMETRICS_INSTANCE = {
+    "openmetrics_endpoint": "http://ray-worker3:8083/",
+}
+
+E2E_METADATA = {
+    'env_vars': {
+        'DD_LOGS_ENABLED': 'true',
+    },
+}
