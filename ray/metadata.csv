@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+ray.process.open_fds,gauge,,,,The number of open file descriptors,0,ray,process open_fds,

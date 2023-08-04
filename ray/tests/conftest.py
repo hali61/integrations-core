@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import os
 import time
 from urllib.parse import urljoin
@@ -10,26 +11,30 @@ import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.http import MockResponse
+from datadog_checks.ray import RayCheck
 
 from .common import (
     E2E_METADATA,
     HEAD_DASHBOARD_PORT,
+    HEAD_INSTANCE,
     HEAD_METRICS_PORT,
     HEAD_OPENMETRICS_ENDPOINT,
-    HEAD_OPENMETRICS_INSTANCE,
     HERE,
+    MOCKED_HEAD_INSTANCE,
+    MOCKED_WORKER_INSTANCE,
     RAY_VERSION,
     SERVE_PORT,
     SERVE_URL,
+    WORKER1_INSTANCE,
     WORKER1_METRICS_PORT,
     WORKER1_OPENMETRICS_ENDPOINT,
-    WORKER1_OPENMETRICS_INSTANCE,
+    WORKER2_INSTANCE,
     WORKER2_METRICS_PORT,
     WORKER2_OPENMETRICS_ENDPOINT,
-    WORKER2_OPENMETRICS_INSTANCE,
+    WORKER3_INSTANCE,
     WORKER3_METRICS_PORT,
     WORKER3_OPENMETRICS_ENDPOINT,
-    WORKER3_OPENMETRICS_INSTANCE,
 )
 
 
@@ -68,17 +73,37 @@ def dd_environment():
         yield {
             "init_config": {},
             "instances": [
-                HEAD_OPENMETRICS_INSTANCE,
-                WORKER1_OPENMETRICS_INSTANCE,
-                WORKER2_OPENMETRICS_INSTANCE,
-                WORKER3_OPENMETRICS_INSTANCE,
+                HEAD_INSTANCE,
+                WORKER1_INSTANCE,
+                WORKER2_INSTANCE,
+                WORKER3_INSTANCE,
             ],
         }, E2E_METADATA
 
 
 @pytest.fixture
-def instance():
-    return {}
+def check():
+    return lambda instance: RayCheck('ray', {}, [instance])
+
+
+@pytest.fixture
+def head_instance():
+    return copy.deepcopy(HEAD_INSTANCE)
+
+
+@pytest.fixture
+def worker_instance():
+    return copy.deepcopy(WORKER1_INSTANCE)
+
+
+@pytest.fixture
+def mocked_head_instance():
+    return copy.deepcopy(MOCKED_HEAD_INSTANCE)
+
+
+@pytest.fixture
+def mocked_worker_instance():
+    return copy.deepcopy(MOCKED_WORKER_INSTANCE)
 
 
 def run_add():
@@ -93,3 +118,18 @@ def run_add():
         return False
     else:
         return response.status_code == 200
+
+
+def mock_http_responses(url, **_params):
+    mapping = {
+        'http://ray-head:8080': 'ray_head.txt',
+        'http://ray-worker:8081': 'ray_worker.txt',
+    }
+
+    metrics_file = mapping.get(url)
+
+    if not metrics_file:
+        raise Exception(f"url `{url}` not registered")
+
+    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
+        return MockResponse(content=f.read())
