@@ -66,9 +66,7 @@ def dd_environment():
             time.sleep(1)
 
         yield {
-            "init_config": {
-                "service": "ray-service",
-            },
+            "init_config": {},
             "instances": [
                 HEAD_OPENMETRICS_INSTANCE,
                 WORKER1_OPENMETRICS_INSTANCE,
