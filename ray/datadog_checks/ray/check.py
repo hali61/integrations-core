@@ -5,7 +5,7 @@
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.ray.config_models import ConfigMixin
 
-from .metrics import METRICS
+from .metrics import METRIC_MAP
 
 
 class RayCheck(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -14,5 +14,5 @@ class RayCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def get_default_config(self):
         return {
-            "metrics": [METRICS],
+            "metrics": [METRIC_MAP],
         }

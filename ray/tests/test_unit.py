@@ -6,24 +6,24 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import METRICS, MOCKED_HEAD_INSTANCE, MOCKED_WORKER_INSTANCE
+from .common import HEAD_METRICS, MOCKED_HEAD_INSTANCE, MOCKED_WORKER_INSTANCE, WORKER_METRICS
 from .conftest import mock_http_responses
 
 pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
-    'instance',
+    'instance, metrics',
     [
-        pytest.param(MOCKED_HEAD_INSTANCE, id='head'),
-        pytest.param(MOCKED_WORKER_INSTANCE, id='worker'),
+        pytest.param(MOCKED_HEAD_INSTANCE, HEAD_METRICS, id='head'),
+        pytest.param(MOCKED_WORKER_INSTANCE, WORKER_METRICS, id='worker'),
     ],
 )
-def test_check(dd_run_check, aggregator, mocker, check, instance):
+def test_check(dd_run_check, aggregator, mocker, check, instance, metrics):
     mocker.patch("requests.get", wraps=mock_http_responses)
     dd_run_check(check(instance))
 
-    for expected_metric in METRICS:
+    for expected_metric in metrics:
         aggregator.assert_metric(f"ray.{expected_metric}")
 
     aggregator.assert_all_metrics_covered()
